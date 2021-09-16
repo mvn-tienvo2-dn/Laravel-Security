@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Post;
+use App\Models\User;
 use Auth;
 
 class PostController extends Controller
@@ -12,10 +12,14 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\m_responsekeys(conn, identifier)
      */
+
+    public function __construct() {
+        $this->middleware('auth');
+    }
     public function index()
-    {
+    {   $this->authorize('viewAny',Post::class);
         $data['listPost'] = Post::all();
         return view('postList',$data);
     }
@@ -39,7 +43,8 @@ class PostController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        if(Gate::allows('create-post')||Gate::allows('create-show-post')){
+        $user = Auth::user();
+        if($user->can('create',Post::class)){
             $id= Auth::id();
             Post::create([
                 'title' => $request['title'],
@@ -62,13 +67,7 @@ class PostController extends Controller
     public function show($id)
     {
         $data['post'] = Post::find($id);
-        if(Gate::allows('show-post',$data['post'])||
-        Gate::allows('create-show-post')){
         return view('detailPost',$data);
-    }
-    else {
-        return redirect('posts/')->with(['error'=>'You have not permission']);
-    }
     }
 
     /**
@@ -92,6 +91,8 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $post=Post::find($id);
+        $this->authorize('update',$post);
         $data = $request->except('_token','_method');
         Post::where('id',$id)->update($data);
         return redirect('posts/');

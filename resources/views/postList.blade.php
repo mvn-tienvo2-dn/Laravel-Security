@@ -28,10 +28,14 @@
                        </thead>
                        <tbody>
                         @foreach($listPost as $post)
+                            @can('view',$post)
                            <tr>
                                <td>{{$post->id}}</td>
-                               <td><a href="{{route('posts.show',['post'=>$post->id])}}">{{$post->title}}</a></td>
-                               <td>{{$post->content}}</td>
+                               <td>
+                                <a href="{{route('posts.show',['post'=>$post->id])}}">{{$post->title}}</a>
+                               </td>
+                               <td>
+                                {{$post->content}}</td>
                                <td>
                                    <div class="row">
                                        <form action="{{route('posts.edit',['post'=>$post->id])}}" method="POST">
@@ -48,6 +52,7 @@
                                    </div>
                                </td>
                            </tr>
+                           @endcan
                         @endforeach
                        </tbody>
                    </table>
