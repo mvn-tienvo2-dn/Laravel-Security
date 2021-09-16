@@ -7,6 +7,11 @@
             <div class="card">
                 <div class="card-header">{{ __('Post List') }}</div>
                 <div class="card-body">
+                    @if (session('error'))
+                    <div class="alert alert-success">
+                        {{ session('error') }}
+                    </div>
+                    @endif
                     <div class="btnCreate">
                         <a href="{{asset('posts/create')}}">
                             <button class="btn btn-primary">Create</button>
@@ -25,7 +30,7 @@
                         @foreach($listPost as $post)
                            <tr>
                                <td>{{$post->id}}</td>
-                               <td>{{$post->title}}</td>
+                               <td><a href="{{route('posts.show',['post'=>$post->id])}}">{{$post->title}}</a></td>
                                <td>{{$post->content}}</td>
                                <td>
                                    <div class="row">

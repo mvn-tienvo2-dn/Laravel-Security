@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Post;
 use Auth;
 
@@ -41,13 +42,18 @@ class PostController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        $id= Auth::id();
-        Post::create([
-            'title' => $request['title'],
-            'content' => $request['content'],
-            'user_id' => $id,
-        ]);
-        return redirect('posts/');
+        if(Gate::allows('create-post')||Gate::allows('create-show-post')){
+            $id= Auth::id();
+            Post::create([
+                'title' => $request['title'],
+                'content' => $request['content'],
+                'user_id' => $id,
+            ]);
+            return redirect('posts/');
+        }
+        else {
+            return redirect('posts/')->with(['error'=>'You have not permission']);
+        }
     }
 
     /**
@@ -58,7 +64,14 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        $data['post'] = Post::find($id);
+        if(Gate::allows('show-post',$data['post'])||
+        Gate::allows('create-show-post')){
+        return view('detailPost',$data);
+    }
+    else {
+        return redirect('posts/')->with(['error'=>'You have not permission']);
+    }
     }
 
     /**
@@ -70,7 +83,7 @@ class PostController extends Controller
     public function edit($id)
     {
         $data['post'] = Post::find($id);
-        return view ('editPost',$data);
+        return view('editPost',$data);
     }
 
     /**
